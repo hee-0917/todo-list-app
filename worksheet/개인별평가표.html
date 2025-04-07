@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>근무평가서</title>
+    <style>
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            font-size: 14px;
+        }
+        .info-table td {
+            height: 30px;
+        }
+        .eval-table th {
+            background-color: #f0f0f0;
+        }
+        .score-input {
+            width: 40px;
+            text-align: center;
+        }
+        .total-row {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>근무평가서</h2>
+    </div>
+
+    <!-- 기본 정보 테이블 -->
+    <table class="info-table">
+        <tr>
+            <td rowspan="2" width="10%">대상자</td>
+            <td width="15%">성명</td>
+            <td width="25%"><input type="text" style="width: 90%;"></td>
+            <td width="15%">평가자</td>
+            <td width="15%"><input type="text" style="width: 90%;"></td>
+            <td rowspan="2" width="20%">
+                평가기간<br>
+                2025년 1월 1일부터<br>
+                1월 31일까지
+            </td>
+        </tr>
+        <tr>
+            <td>소속</td>
+            <td><input type="text" style="width: 90%;"></td>
+            <td>이전의 과장</td>
+            <td></td>
+        </tr>
+    </table>
+
+    <!-- 평가 항목 테이블 -->
+    <table class="eval-table">
+        <tr>
+            <th>구분</th>
+            <th>평가요소</th>
+            <th>평가항목</th>
+            <th>평가내용</th>
+            <th>평가척도</th>
+            <th>평가배점</th>
+            <th>비고</th>
+        </tr>
+        <!-- 업무역량 섹션 -->
+        <tr>
+            <td rowspan="5">업무역량<br>(7.5점)</td>
+            <td>업무의 양</td>
+            <td>예약관리</td>
+            <td>
+                업무 진도 예약 및 처리관리, 업무량을 일무<br>
+                업무의 양과 처리 속도가 보통이거나 오류가 가끔있고 개선되는 것이 있는는가?<br>
+                업무의 양과 처리 속도가 느리거나 오류가 많고 지적된 문제가 많은가?
+            </td>
+            <td>
+                <select class="score-input">
+                    <option value="-1">-1</option>
+                    <option value="0">0</option>
+                    <option value="1.5">1.5</option>
+                </select>
+            </td>
+            <td>1.5</td>
+            <td></td>
+        </tr>
+        <!-- 나머지 평가 항목들도 같은 형식으로 추가 -->
+        <!-- 여기에 나머지 항목들 추가 -->
+    </table>
+
+    <!-- 총합 계산 행 -->
+    <table>
+        <tr class="total-row">
+            <td colspan="4">총 합계 점(총 15점)</td>
+            <td id="totalScore">0</td>
+        </tr>
+    </table>
+
+    <button onclick="saveToExcel()">엑셀로 저장</button>
+
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script>
+        // 점수 계산 및 업데이트 함수
+        function updateTotalScore() {
+            const scores = document.querySelectorAll('.score-input');
+            let total = 0;
+            scores.forEach(score => {
+                total += parseFloat(score.value || 0);
+            });
+            document.getElementById('totalScore').textContent = total.toFixed(1);
+        }
+
+        // 엑셀 저장 함수
+        function saveToExcel() {
+            // 데이터 수집
+            const data = [
+                ['근무평가서'],
+                ['대상자 성명', document.querySelector('input[type="text"]').value],
+                ['소속', document.querySelectorAll('input[type="text"]')[1].value],
+                ['평가기간', '2025년 1월 1일부터 1월 31일까지'],
+                ['평가자', document.querySelectorAll('input[type="text"]')[2].value],
+                [],
+                ['구분', '평가요소', '평가항목', '평가내용', '평가척도', '평가배점', '비고']
+                // 여기에 평가 데이터 추가
+            ];
+
+            // 워크북 생성
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            XLSX.utils.book_append_sheet(wb, ws, "근무평가서");
+
+            // 파일 저장
+            XLSX.writeFile(wb, "근무평가서.xlsx");
+        }
+
+        // 이벤트 리스너 등록
+        document.querySelectorAll('.score-input').forEach(input => {
+            input.addEventListener('change', updateTotalScore);
+        });
+    </script>
+</body>
+</html>

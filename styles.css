@@ -1,0 +1,82 @@
+/* 기본 버튼 스타일 수정 */
+button {
+    padding: 4px 8px;  /* 패딩 축소 */
+    font-size: 12px;   /* 글자 크기 축소 */
+    min-height: 26px;  /* 최소 높이 축소 */
+    min-width: 26px;   /* 최소 너비 축소 */
+}
+
+/* 작업 버튼 영역 수정 */
+.task-actions {
+    display: flex;
+    gap: 3px;          /* 버튼 간격 축소 */
+    flex-wrap: nowrap;
+    margin-top: 6px;   /* 상단 여백 축소 */
+}
+
+.task-actions button {
+    flex: none;        /* flex 속성 제거 */
+    font-size: 11px;   /* 글자 크기 축소 */
+    padding: 3px 6px;  /* 패딩 축소 */
+    height: 24px;      /* 높이 축소 */
+}
+
+/* 모바일 대응 스타일 수정 */
+@media (max-width: 768px) {
+    .task-actions {
+        display: flex;
+        flex-wrap: nowrap !important;  /* 줄바꿈 방지 */
+        gap: 2px;                      /* 버튼 간격 최소화 */
+        justify-content: space-between; /* 버튼 간격 균등 분배 */
+    }
+
+    .task-actions button {
+        flex: none;              /* flex 속성 제거 */
+        font-size: 10px;        /* 글자 크기 축소 */
+        padding: 2px 4px;       /* 패딩 축소 */
+        height: 22px;           /* 높이 축소 */
+        white-space: nowrap;    /* 텍스트 줄바꿈 방지 */
+    }
+
+    /* 버튼 최소 너비 설정 */
+    .memo-btn { 
+        width: 28px;      /* 메모 버튼 너비 */
+        min-width: auto;
+    }
+    .edit-btn { 
+        width: 28px;      /* 수정 버튼 너비 */
+        min-width: auto;
+    }
+    .delete-btn { 
+        width: 28px;      /* 삭제 버튼 너비 */
+        min-width: auto;
+    }
+    .move-btn { 
+        width: 45px;      /* 이동 버튼 너비 */
+        min-width: auto;
+    }
+
+    /* 진행중인 일의 이동 버튼 텍스트 축소 */
+    #progress .move-btn[onclick*="todo"]::after {
+        content: '할일';
+    }
+    #progress .move-btn[onclick*="done"]::after {
+        content: '완료';
+    }
+}
+
+/* 더 작은 화면에 대한 추가 최적화 */
+@media screen and (max-width: 375px) {
+    .task-actions button {
+        font-size: 9px;    /* 더 작은 화면에서 글자 크기 추가 축소 */
+        padding: 2px 2px;  /* 패딩 추가 축소 */
+        height: 20px;      /* 높이 추가 축소 */
+    }
+
+    .memo-btn, .edit-btn, .delete-btn {
+        width: 24px;      /* 더 작은 화면에서 버튼 너비 축소 */
+    }
+    .move-btn {
+        width: 35px;      /* 더 작은 화면에서 이동 버튼 너비 축소 */
+    }
+} 

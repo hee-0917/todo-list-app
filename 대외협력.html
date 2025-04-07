@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="세강병원">
+    <meta property="og:title" content="세강병원">              <!-- Open Graph 타이틀 -->
+    <meta property="og:description" content="세강병원">        <!-- Open Graph 설명 -->
+    <meta name="apple-mobile-web-app-title" content="세강병원"> <!-- iOS 앱 타이틀 -->
+    <meta name="application-name" content="세강병원">          <!-- 앱 이름 -->
+    <title>세강병원</title>
+    <!-- Google Fonts 추가 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            margin-top: 70px;  /* 로고 높이 + 여백 */
+        }
+        .title-section {
+            background: #1a4789;  /* 세강병원 파란색으로 변경 */
+            padding: 35px 15px;
+            margin: -15px -15px 30px -15px;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);  /* 그림자 효과 추가 */
+        }
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.4em;        /* 3.6em에서 2.4em으로 축소 */
+            line-height: 1.5;
+            margin: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 300;        /* 더 가벼운 폰트 웨이트 */
+            letter-spacing: -0.02em; /* 자간 미세 조정 */
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.15);
+        }
+        h1 .highlight {
+            color: #FF8A3D;
+            font-weight: 700;        /* 하이라이트 부분 더 진하게 */
+            font-size: 1.1em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3); /* 하이라이트 그림자 강화 */
+        }
+        h1 span.hospital-name {
+            display: block;
+            font-size: 57em;         /* 28.5em에서 57em으로 2배 증가 */
+            color: white;
+            margin-top: 5px;         /* 여백 더 줄임 */
+            font-weight: bold;
+            letter-spacing: 0.15em;   /* 자간 더 줄임 */
+            text-shadow: 8px 8px 16px rgba(0,0,0,0.2);  /* 그림자 강화 */
+            line-height: 1.1;        /* 줄 높이 조정 */
+        }
+        .gallery {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;                /* 이미지 간격 증가 */
+        }
+        .image-container {
+            max-width: 350px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            padding: 8px;               /* 패딩 추가 */
+            background: white;          /* 배경색 추가 */
+            border: 2px solid #1a4789; /* 세강병원 파란색 테두리 */
+            border-radius: 15px;       /* 모서리 둥글게 */
+            margin: 15px 0;            /* 여백 추가 */
+        }
+        .image-container:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            border-color: #FF8A3D;    /* 호버 시 주황색으로 변경 */
+        }
+        img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;        /* 이미지 모서리도 둥글게 */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border: 1px solid #eee;    /* 이미지 자체에도 미세한 테두리 */
+        }
+        @media (max-width: 768px) {
+            .gallery {
+                flex-direction: column;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            
+            h1 span.hospital-name {
+                font-size: 42em;     /* 모바일에서도 매우 크게 */
+                letter-spacing: 0.1em;
+                margin-top: 3px;
+                line-height: 1;
+            }
+        }
+        footer {
+            color: #333;
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 40px;
+            background-color: #ffffff;
+            width: 100%;
+        }
+        .footer-content p {
+            margin: 5px 0;
+        }
+        .highlight {
+            color: #ff7e5f; /* 주황색 */
+        }
+        .note {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 10px;
+        }
+        .footer {
+            padding: 40px 15px;
+            margin-top: 30px;
+            border-top: 1px solid rgba(0,0,0,0.05);
+        }
+        .footer-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .footer-logo {
+            width: 320px;          /* 160px에서 320px로 2배 증가 */
+            height: auto;
+            margin-bottom: 20px;    /* 여백도 약간 증가 */
+            object-fit: contain;
+            background: transparent;
+            padding: 0;
+            box-shadow: none;
+            border: none;
+            border-radius: 0;
+            mix-blend-mode: multiply;
+            -webkit-filter: none;
+            filter: none;
+        }
+        .footer-logo img {
+            border: none;
+            box-shadow: none;
+            background: transparent;
+        }
+        .footer-info {
+            text-align: center;
+            margin-top: 5px;
+            background: transparent;  /* 배경을 투명하게 설정 */
+        }
+        .footer .company-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #1a4789;        /* 다시 파란색으로 */
+            margin-top: -5px;
+        }
+        .footer p {
+            color: #333;          /* 다시 진한 회색으로 */
+            margin: 5px 0;
+            font-size: 1em;
+        }
+        .footer .tel {
+            color: #1a4789;       /* 다시 파란색으로 */
+            font-weight: bold;
+        }
+        /* 구분선 추가 */
+        .footer-info p:not(:last-child) {
+            margin-bottom: 8px;
+        }
+        /* 모바일 대응도 2배 크기로 수정 */
+        @media (max-width: 768px) {
+            .footer-logo {
+                width: 180px;      /* 90px에서 180px로 2배 증가 */
+            }
+            
+            .footer .company-name {
+                font-size: 1.2em;
+            }
+            
+            .footer p {
+                font-size: 1em;
+            }
+        }
+        /* 세강병원 텍스트를 위한 새로운 스타일 */
+        .hospital-title {
+            display: block;
+            font-size: 1.8em;        /* 상위 텍스트보다 더 크게 */
+            color: white;
+            margin-top: 10px;
+            font-weight: 700;        /* 볼드체 */
+            letter-spacing: 0.02em;  /* 자간 약간 넓게 */
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.2);
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        /* 모바일 대응 */
+        @media (max-width: 768px) {
+            .hospital-title {
+                font-size: 1.6em;
+            }
+        }
+        /* 부드러운 애니메이션 효과 추가 */
+        .title-section h1 {
+            opacity: 0;
+            animation: fadeIn 1s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        /* 상단 문구 스타일 수정 */
+        .top-text {
+            font-size: 0.7em;
+            font-weight: 600;        /* 더 진하게 변경 */
+            letter-spacing: 0.02em;  /* 자간 살짝 조정 */
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.25); /* 그림자 강화 */
+        }
+        .homepage-link {
+            color: #1a4789;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .homepage-link:hover {
+            color: #FF8A3D;
+            text-decoration: underline;
+        }
+        /* 기존 스타일 유지하고 아래 내용 추가 */
+        .fixed-logo {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: white;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 10px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .fixed-logo img {
+            height: 50px;
+            width: auto;
+            border: none;
+            box-shadow: none;
+            background: transparent;
+        }
+
+        /* 모바일 대응 */
+        @media (max-width: 768px) {
+            .fixed-logo img {
+                height: 40px;
+            }
+            .container {
+                margin-top: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="fixed-logo">
+        <img src="C:/Users/SEKANGACE006/Desktop/코딩/logo2.png" alt="세강병원 로고">
+    </div>
+    <div class="container">
+        <div class="title-section">
+            <h1>
+                <span class="top-text"><span class="highlight">검진</span>에서 <span class="highlight">수술</span>까지</span>
+                <br>
+                <span class="hospital-title">세강병원</span>
+            </h1>
+        </div>
+        <div class="gallery">
+            <div class="image-container">
+                <img src="사진1.jpg" alt="첫 번째 사진">
+            </div>
+            <div class="image-container">
+                <img src="사진2.jpg" alt="두 번째 사진">
+            </div>
+            <div class="image-container">
+                <img src="사진3.jpg" alt="세 번째 사진">
+            </div>
+        </div>
+    </div>
+    <footer>
+        <div class="footer">
+            <div class="footer-container">
+                <img src="C:/Users/SEKANGACE006/Desktop/코딩/logo2.png" alt="세강병원 로고" class="footer-logo">
+                <div class="footer-info">
+                    <p class="company-name">의료법인 일민의료재단 세강병원</p>
+                    <p>주소: 대구 달서구 구마로 220</p>
+                    <p>대표번호: <span class="tel">053-215-6200</span></p>
+                    <p>홈페이지: <a href="https://www.skhospital.co.kr/" class="homepage-link">www.skhospital.co.kr</a></p>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>업무 리스트</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .board {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .board {
+                flex-direction: column;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            .task-input {
+                flex-direction: column;
+                gap: 8px;
+                margin-bottom: 20px;
+            }
+
+            .task-input input[type="text"],
+            .task-input input[type="date"] {
+                width: 100%;
+                margin-bottom: 8px;
+            }
+
+            .task-input button {
+                height: 45px;
+                font-size: 15px;
+                padding: 0 15px;
+                width: auto;
+                min-width: 80px;
+                align-self: flex-end;
+            }
+
+            .task-actions {
+                gap: 6px;
+            }
+
+            .task-actions button {
+                padding: 8px 12px;
+                font-size: 14px;
+                height: 35px;
+                flex: 0 1 auto;
+                min-width: auto;
+            }
+
+            .list-view-btn,
+            .print-btn {
+                padding: 8px 15px;
+                font-size: 14px;
+                height: 40px;
+            }
+
+            .modal-buttons button {
+                padding: 8px 15px;
+                font-size: 14px;
+                height: 40px;
+            }
+
+            h1 {
+                font-size: 24px;
+                margin: 20px 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .task-actions button {
+                font-size: 13px;
+                padding: 6px 10px;
+                height: 32px;
+            }
+
+            .task-input input[type="text"],
+            .task-input input[type="date"] {
+                font-size: 15px;
+            }
+        }
+
+        .column {
+            width: 100%;
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .column h2 {
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        .task-input {
+            position: sticky;  /* 입력창 고정 */
+            top: 0;           /* 상단에 고정 */
+            background: white;
+            padding: 15px 0;
+            z-index: 10;      /* 다른 요소들 위에 표시 */
+            margin-bottom: 15px;
+        }
+
+        .task-input input[type="text"] {
+            flex: 3;
+            height: 45px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .task-input input[type="date"] {
+            flex: 1;
+            height: 45px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            min-width: 140px;
+        }
+
+        .task-input button {
+            height: 38px;
+            padding: 0 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            font-weight: 500;
+            font-size: 13px;
+            min-height: 32px;
+            min-width: 32px;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .task {
+            background: #f8f9fa;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 3px;
+            flex-wrap: nowrap;
+            margin-top: 8px;
+            justify-content: center;
+        }
+
+        .task-actions button {
+            flex: 0 1 auto;
+            font-size: 11px;
+            padding: 4px 8px;
+            height: 24px;
+            min-width: 40px;
+            border-radius: 3px;
+            white-space: nowrap;
+        }
+
+        .edit-btn {
+            background-color: #2980b9;
+        }
+        .delete-btn {
+            background-color: #c0392b;
+        }
+        .memo-btn {
+            background-color: #8e44ad;
+            border-radius: 4px 0 0 4px;
+        }
+        .move-btn {
+            background-color: #27ae60;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .date-input {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 8px;
+            font-size: 16px;
+        }
+
+        .task-date {
+            font-size: 13px;
+            color: #e74c3c;
+            margin-left: 10px;
+        }
+
+        .list-view-btn,
+        .print-btn {
+            background-color: #2980b9;
+            color: white;
+            font-weight: 600;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000; /* 최상위 레이어 */
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            position: relative;
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            margin: 20px auto;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1001; /* 모달 컨텐츠는 가장 위에 */
+        }
+
+        .button-container {
+            margin-top: 20px;
+            text-align: right;
+        }
+
+        .modal-buttons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .print-btn {
+            background-color: #3498db;
+            margin-right: 15px;
+        }
+
+        .task-category {
+            padding: 20px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .task-category:last-child {
+            border-bottom: none;
+        }
+
+        .task-category h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .task-list-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            border-left: 4px solid #3498db;
+        }
+
+        /* 버튼 기본 스타일 수정 */
+        button {
+            padding: 4px 8px;
+            font-size: 12px;
+            min-height: 26px;
+            min-width: 26px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        /* 버튼 색상 */
+        .memo-btn { 
+            background-color: #9b59b6;
+        }
+        .edit-btn { 
+            background-color: #3498db;
+        }
+        .delete-btn { 
+            background-color: #e74c3c;
+        }
+        .move-btn { 
+            background-color: #2ecc71;
+        }
+
+        /* 작업 버튼 영역 */
+        .task-actions {
+            display: flex;
+            gap: 3px;
+            flex-wrap: nowrap;
+            margin-top: 8px;
+            justify-content: center;
+        }
+
+        /* 모바일 최적화 스타일 */
+        @media screen and (max-width: 768px) {
+            .task-actions {
+                display: flex;
+                flex-wrap: nowrap;
+                gap: 3px;
+                justify-content: center;
+            }
+
+            .task-actions button {
+                flex: 0 1 auto;
+                font-size: 10px;
+                padding: 2px 6px;
+                height: 22px;
+                min-width: 35px;
+                white-space: nowrap;
+            }
+
+            /* 버튼 텍스트 수정 */
+            .move-btn[onclick*="progress"] {
+                font-size: 10px;
+            }
+        }
+
+        /* 더 작은 화면에 대한 추가 최적화 */
+        @media screen and (max-width: 375px) {
+            .task-actions button {
+                font-size: 9px;
+                padding: 2px 4px;
+                height: 20px;
+                min-width: 30px;
+            }
+        }
+
+        /* 전체목록 버튼 컨테이너 */
+        .list-view-container {
+            margin: 20px 0;  /* 여백 조정 */
+        }
+
+        .list-view-btn {
+            background-color: #34495e;
+            padding: 8px 15px;
+        }
+
+        /* 모달 헤더 수정 */
+        .modal-header {
+            position: relative;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .modal-buttons {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .print-btn {
+            background-color: #3498db;
+        }
+
+        /* 모달 닫기 버튼 */
+        .close {
+            color: #777;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0 5px;
+        }
+
+        /* 모바일 대응 */
+        @media (max-width: 768px) {
+            .modal-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .modal-buttons {
+                position: static;
+                transform: none;
+                justify-content: flex-end;
+                margin-top: 10px;
+            }
+
+            .list-view-container {
+                margin: 15px 0;
+            }
+        }
+
+        /* 타이틀 스타일 수정 */
+        h1 {
+            text-align: center;
+            margin: 30px 0;  /* 상하 여백 증가 */
+            font-size: 28px;  /* 글자 크기 증가 */
+            color: #2c3e50;  /* 글자 색상 */
+            font-weight: 600;
+        }
+
+        /* 입력 영역 버튼 */
+        .task-input button {
+            height: 38px;
+            padding: 0 15px;
+        }
+
+        /* 전체목록 보기 버튼 */
+        .list-view-btn {
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+
+        /* 목록 출력 버튼 */
+        .print-btn {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+
+        /* 메모 저장 버튼 */
+        .memo-container button {
+            padding: 6px 12px;
+            margin-top: 5px;
+        }
+
+        /* 메모 관련 스타일 수정 */
+        .memo-container {
+            margin-top: 10px;
+            display: none;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .memo-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-height: 60px;
+            font-size: 14px;
+            resize: vertical;
+            margin-bottom: 8px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        .memo-text {
+            background: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 8px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .memo-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .memo-save-btn {
+            background-color: #27ae60;
+        }
+
+        .memo-cancel-btn {
+            background-color: #95a5a6;
+        }
+
+        /* 모바일 대응 */
+        @media (max-width: 768px) {
+            .memo-input {
+                font-size: 16px;
+                padding: 10px;
+                min-height: 80px; /* 모바일에서 더 큰 입력 영역 */
+            }
+
+            .memo-actions button {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+        }
+
+        /* 작업 목록 영역 */
+        .tasks-container {
+            margin-top: 10px;  /* 입력창과의 간격 */
+            overflow-y: auto;  /* 스크롤 가능하도록 */
+        }
+
+        /* 모바일 최적화 스타일 */
+        @media screen and (max-width: 768px) {
+            /* 전체 레이아웃 */
+            .board {
+                flex-direction: column;
+                padding: 10px;
+                gap: 20px;
+            }
+
+            .column {
+                width: 100%;
+                min-width: unset;
+                margin: 0;
+            }
+
+            /* 제목 */
+            h1 {
+                font-size: 24px;
+                margin: 15px 0;
+            }
+
+            h2 {
+                font-size: 18px;
+                margin: 10px 0;
+            }
+
+            /* 입력 영역 */
+            .task-input {
+                flex-direction: column;
+                gap: 8px;
+                padding: 10px;
+            }
+
+            .task-input input[type="text"],
+            .task-input input[type="date"] {
+                width: 100%;
+                height: 36px;
+                font-size: 14px;
+            }
+
+            .task-input button {
+                width: 100%;
+                height: 36px;
+                font-size: 14px;
+            }
+
+            /* 작업 아이템 */
+            .task {
+                padding: 10px;
+                margin-bottom: 8px;
+            }
+
+            .task-content {
+                font-size: 14px;
+                margin-bottom: 8px;
+            }
+
+            .task-date {
+                font-size: 12px;
+                display: block;
+                margin-top: 4px;
+            }
+
+            /* 작업 버튼 영역 */
+            .task-actions {
+                display: flex;
+                flex-wrap: nowrap;  /* 한 줄로 강제 */
+                gap: 2px;          /* 버튼 간격 축소 */
+                justify-content: space-between; /* 버튼 간격 균등 분배 */
+            }
+
+            .task-actions button {
+                flex: 1;           /* 균등 분배 */
+                font-size: 11px;   /* 글자 크기 축소 */
+                padding: 4px 2px;  /* 패딩 축소 */
+                height: 28px;      /* 높이 축소 */
+                min-width: 0;      /* 최소 너비 제거 */
+                width: auto;       /* 가로 크기 자동 */
+                white-space: nowrap;
+            }
+
+            /* 버튼 텍스트 축소 */
+            .move-btn[onclick*="progress"] {
+                font-size: 11px;
+            }
+
+            /* 메모 버튼 */
+            .memo-btn, .edit-btn, .delete-btn, .move-btn { 
+                width: auto;  /* 가로 크기 자동으로 변경 */
+                min-width: 0; /* 최소 너비 제거 */
+            }
+
+            /* 메모 영역 */
+            .memo-container {
+                margin-top: 8px;
+            }
+
+            .memo-input {
+                width: 100%;
+                min-height: 60px;
+                font-size: 14px;
+                padding: 8px;
+            }
+
+            .memo-actions {
+                gap: 8px;
+                margin-top: 8px;
+            }
+
+            .memo-actions button {
+                height: 32px;
+                font-size: 12px;
+                padding: 0 12px;
+            }
+
+            .memo-text {
+                font-size: 13px;
+                padding: 8px;
+                margin-top: 8px;
+            }
+
+            /* 전체목록 버튼 */
+            .view-all-btn {
+                font-size: 14px;
+                height: 36px;
+                margin: 10px 0;
+            }
+
+            /* 모달 */
+            .modal-content {
+                width: 90%;
+                max-height: 80vh;
+                padding: 15px;
+            }
+
+            .modal-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+            }
+
+            .modal-header h2 {
+                text-align: center;
+            }
+
+            .modal-header button {
+                width: 100%;
+                height: 36px;
+                font-size: 14px;
+            }
+        }
+
+        /* 더 작은 화면에 대한 추가 최적화 */
+        @media screen and (max-width: 375px) {
+            .task-actions button {
+                font-size: 10px;   /* 더 작은 화면에서 글자 크기 추가 축소 */
+                padding: 4px 1px;  /* 패딩 추가 축소 */
+                height: 24px;      /* 높이 축소 */
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            h2 {
+                font-size: 16px;
+            }
+        }
+
+        /* 비활성화된 버튼 스타일 */
+        button:disabled {
+            cursor: not-allowed;
+            background-color: #cccccc;
+        }
+
+        /* 활성화된 버튼 스타일 */
+        button:enabled {
+            cursor: pointer;
+            opacity: 1 !important;
+        }
+
+        /* 비밀번호 입력 필드 포커스 스타일 */
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #2980b9;
+            box-shadow: 0 0 5px rgba(41, 128, 185, 0.3);
+        }
+
+        /* 로그인 관련 스타일 */
+        .password-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            color: white;
+            background-color: #cccccc;
+            cursor: not-allowed;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+
+        .login-btn:not(:disabled) {
+            background-color: #2980b9;
+            cursor: pointer;
+            opacity: 1;
+        }
+
+        .login-btn:not(:disabled):hover {
+            background-color: #2471a3;
+        }
+
+        /* 상단 버튼 컨테이너 스타일 수정 */
+        .top-buttons {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+            z-index: 900; /* 모달보다 낮은 z-index 설정 */
+        }
+
+        /* 상단 버튼 스타일 */
+        .change-password-btn,
+        .logout-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .change-password-btn {
+            background-color: #2980b9;
+        }
+
+        .logout-btn {
+            background-color: #dc3545;
+        }
+
+        /* 모달 오버레이 스타일 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999; /* 버튼보다 위, 모달보다 아래 */
+        }
+
+        /* 모달 애니메이션 */
+        .modal.show .modal-content {
+            animation: modalSlideUp 0.3s ease-out forwards;
+        }
+
+        @keyframes modalSlideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* 비밀번호 변경 모달 스타일 수정 */
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #666;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .password-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .change-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            color: white;
+            background-color: #2980b9;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .change-btn:disabled {
+            background-color: #cccccc !important;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .modal-footer {
+            text-align: center;
+            padding-top: 20px;
+        }
+    </style>
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Firebase SDK 임포트
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, get, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // Firebase 설정
+        const firebaseConfig = {
+            apiKey: "AIzaSyClxTAMuixGkTnn7O8oRNB1iMgdV7CLxbs",
+            authDomain: "skjob-9eb40.firebaseapp.com",
+            projectId: "skjob-9eb40",
+            storageBucket: "skjob-9eb40.firebasestorage.app",
+            messagingSenderId: "291967300473",
+            appId: "1:291967300473:web:9008c4b0650e05c05875a8",
+            measurementId: "G-YPCTSTC4SW",
+            databaseURL: "https://skjob-9eb40-default-rtdb.asia-southeast1.firebasedatabase.app"
+        };
+
+        // Firebase 초기화
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // 전역 변수로 내보내기
+        window.db = database;
+        window.dbRef = ref;
+        window.dbGet = get;
+        window.dbSet = set;
+        window.dbOnValue = onValue;
+        window.dbRemove = remove;
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>업무 리스트</h1>
+        <div class="list-view-container">
+            <button onclick="showTaskList()" class="list-view-btn">전체 목록 보기</button>
+        </div>
+        <div class="board">
+            <!-- 해야할 일 -->
+            <div class="column" id="todo">
+                <h2>해야할 일</h2>
+                <div class="task-input">
+                    <input type="text" id="todoInput" placeholder="새로운 업무 추가">
+                    <input type="date" id="todoDate" class="date-input">
+                    <button onclick="addTask('todo')">추가</button>
+                </div>
+                <div id="todoTasks" class="tasks-container"></div>
+            </div>
+
+            <!-- 진행중인 일 -->
+            <div class="column" id="progress">
+                <h2>진행중인 일</h2>
+                <div id="progressTasks"></div>
+            </div>
+
+            <!-- 완료된 일 -->
+            <div class="column" id="done">
+                <h2>완료된 일</h2>
+                <div id="doneTasks"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="taskListModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>전체 업무 목록</h2>
+                <div class="modal-buttons">
+                    <button onclick="printTaskList()" class="print-btn">목록 출력</button>
+                    <span class="close" onclick="closeTaskList()">&times;</span>
+                </div>
+            </div>
+            <div class="task-list-categories" id="printArea"></div>
+        </div>
+    </div>
+
+    <!-- 로그인 모달 -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>로그인</h3>
+            </div>
+            <div class="modal-body">
+                <input type="password" id="passwordInput" placeholder="비밀번호를 입력하세요" class="password-input">
+                <button id="loginButton" onclick="login()" class="login-btn" disabled>로그인</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 비밀번호 변경 모달 -->
+    <div id="passwordChangeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>비밀번호 변경</h3>
+                <button class="close-btn" onclick="closePasswordChangeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="password-input-group">
+                    <input type="password" id="currentPassword" placeholder="현재 비밀번호" class="password-input">
+                    <input type="password" id="newPassword" placeholder="새 비밀번호" class="password-input">
+                    <input type="password" id="confirmPassword" placeholder="새 비밀번호 확인" class="password-input">
+                </div>
+                <div class="modal-footer">
+                    <button id="changePasswordButton" onclick="handlePasswordChange()" class="change-btn">변경하기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 상단 버튼 그룹 -->
+    <div class="top-buttons">
+        <button onclick="showPasswordChangeModal()" class="change-password-btn">비밀번호 변경</button>
+        <button onclick="logout()" class="logout-btn">로그아웃</button>
+    </div>
+
+    <script>
+        // 데이터 구조 초기화
+        let tasks = {
+            todo: [],
+            progress: [],
+            done: []
+        };
+
+        // 로그인 관련 JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            // 로그인 상태 확인
+            checkLoginStatus();
+            
+            // 비밀번호 입력 필드와 로그인 버튼
+            const passwordInput = document.getElementById('passwordInput');
+            const loginButton = document.getElementById('loginButton');
+
+            // 비밀번호 입력 감지
+            passwordInput.addEventListener('input', function() {
+                const password = this.value.trim();
+                loginButton.disabled = password.length === 0;
+                
+                if (password.length > 0) {
+                    loginButton.style.backgroundColor = '#2980b9';
+                    loginButton.style.opacity = '1';
+                    loginButton.style.cursor = 'pointer';
+                } else {
+                    loginButton.style.backgroundColor = '#cccccc';
+                    loginButton.style.opacity = '0.7';
+                    loginButton.style.cursor = 'not-allowed';
+                }
+            });
+
+            // Enter 키 이벤트
+            passwordInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !loginButton.disabled) {
+                    login();
+                }
+            });
+        });
+
+        // 로그인 상태 확인
+        function checkLoginStatus() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            if (!isLoggedIn) {
+                showLoginModal();
+            } else {
+                hideLoginModal();
+                showMainContent();
+            }
+        }
+
+        // 로그인 모달 표시
+        function showLoginModal() {
+            const modal = document.getElementById('loginModal');
+            modal.style.display = 'block';
+            document.querySelector('.container').style.display = 'none';
+        }
+
+        // 로그인 모달 숨기기
+        function hideLoginModal() {
+            const modal = document.getElementById('loginModal');
+            modal.style.display = 'none';
+        }
+
+        // 메인 컨텐츠 표시
+        function showMainContent() {
+            document.querySelector('.container').style.display = 'block';
+        }
+
+        // 로그인 처리
+        function login() {
+            const password = document.getElementById('passwordInput').value.trim();
+            const correctPassword = localStorage.getItem('password') || "1234"; // 기본 비밀번호
+            
+            if (password === correctPassword) {
+                localStorage.setItem('isLoggedIn', 'true');
+                hideLoginModal();
+                showMainContent();
+                
+                // Firebase 데이터 로드 (만약 Firebase를 사용하는 경우)
+                if (typeof loadTasks === 'function') {
+                    loadTasks();
+                }
+            } else {
+                alert('비밀번호가 올바르지 않습니다.');
+                document.getElementById('passwordInput').value = '';
+                const loginButton = document.getElementById('loginButton');
+                loginButton.disabled = true;
+                loginButton.style.backgroundColor = '#cccccc';
+                loginButton.style.opacity = '0.7';
+            }
+        }
+
+        // 로그아웃
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            location.reload();
+        }
+
+        // 데이터 로드 함수
+        function loadTasks() {
+            try {
+                if (!window.db || !window.dbRef) {
+                    console.error("Firebase가 초기화되지 않았습니다.");
+                    // 로컬 스토리지에서 데이터 로드
+                    const localTasks = localStorage.getItem('tasks');
+                    if (localTasks) {
+                        tasks = JSON.parse(localTasks);
+                    }
+                    renderTasks();
+                    return;
+                }
+
+                const tasksRef = window.dbRef(window.db, 'tasks');
+                window.dbOnValue(tasksRef, (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        tasks = data;
+                    } else {
+                        tasks = {
+                            todo: [],
+                            progress: [],
+                            done: []
+                        };
+                    }
+                    // 로컬 스토리지에도 백업
+                    localStorage.setItem('tasks', JSON.stringify(tasks));
+                    renderTasks();
+                }, (error) => {
+                    console.error("Firebase 데이터 로드 오류:", error);
+                    // 오류 발생 시 로컬 스토리지에서 데이터 로드
+                    const localTasks = localStorage.getItem('tasks');
+                    if (localTasks) {
+                        tasks = JSON.parse(localTasks);
+                    }
+                    renderTasks();
+                });
+            } catch (error) {
+                console.error("데이터 로드 중 오류 발생:", error);
+                // 오류 발생 시 로컬 스토리지에서 데이터 로드
+                const localTasks = localStorage.getItem('tasks');
+                if (localTasks) {
+                    tasks = JSON.parse(localTasks);
+                }
+                renderTasks();
+            }
+        }
+
+        // 태스크 렌더링
+        function renderTasks() {
+            // 해야할 일
+            document.getElementById('todoTasks').innerHTML = tasks.todo
+                .map(task => createTaskHTML(task, 'todo'))
+                .join('');
+            
+            // 진행중인 일
+            document.getElementById('progressTasks').innerHTML = tasks.progress
+                .map(task => createTaskHTML(task, 'progress'))
+                .join('');
+            
+            // 완료된 일
+            document.getElementById('doneTasks').innerHTML = tasks.done
+                .map(task => createTaskHTML(task, 'done'))
+                .join('');
+        }
+
+        // 태스크 HTML 생성
+        function createTaskHTML(task, status) {
+            let moveButtons = '';
+            
+            // 상태별 이동 버튼 설정
+            switch(status) {
+                case 'todo':
+                    moveButtons = `
+                        <button class="move-btn" onclick="moveTask(${task.id}, '${status}', 'progress')">
+                            진행중
+                        </button>
+                    `;
+                    break;
+                case 'progress':
+                    moveButtons = `
+                        <button class="move-btn move-prev" onclick="moveTask(${task.id}, '${status}', 'todo')">
+                            할일
+                        </button>
+                        <button class="move-btn move-next" onclick="moveTask(${task.id}, '${status}', 'done')">
+                            완료
+                        </button>
+                    `;
+                    break;
+                case 'done':
+                    moveButtons = `
+                        <button class="move-btn move-prev" onclick="moveTask(${task.id}, '${status}', 'progress')">
+                            진행중
+                        </button>
+                    `;
+                    break;
+            }
+
+            return `
+                <div class="task">
+                    <div class="task-content">
+                        ${task.text}
+                        ${task.dueDate ? `<span class="task-date">기한: ${task.dueDate}</span>` : ''}
+                    </div>
+                    <div class="task-actions">
+                        <button class="memo-btn" onclick="toggleMemo(${task.id}, '${status}')">
+                            ${task.showMemo ? '메모 닫기' : '메모'}
+                        </button>
+                        <button class="edit-btn" onclick="editTask(${task.id}, '${status}')">수정</button>
+                        <button class="delete-btn" onclick="deleteTask(${task.id}, '${status}')">삭제</button>
+                        ${moveButtons}
+                    </div>
+                    <div class="memo-container" style="display: ${task.showMemo ? 'block' : 'none'}">
+                        <textarea class="memo-input" id="memo-${task.id}" 
+                            placeholder="메모를 입력하세요"
+                            autocomplete="off"
+                            autocorrect="off"
+                            autocapitalize="off"
+                            spellcheck="false">${task.memo || ''}</textarea>
+                        <div class="memo-actions">
+                            <button class="memo-cancel-btn" onclick="cancelMemo(${task.id}, '${status}')">취소</button>
+                            <button class="memo-save-btn" onclick="saveMemo(${task.id}, '${status}')">저장</button>
+                        </div>
+                    </div>
+                    ${task.memo ? `<div class="memo-text">${task.memo.replace(/\n/g, '<br>')}</div>` : ''}
+                </div>
+            `;
+        }
+
+        // 전체 목록 보기 관련 함수 추가
+        function showTaskList() {
+            const modal = document.getElementById('taskListModal');
+            const content = document.getElementById('printArea');
+            const taskInput = document.querySelector('.task-input');
+            taskInput.style.display = 'none'; // 업무 추가 창 숨기기
+            let listHTML = '';
+
+            ['todo', 'progress', 'done'].forEach(status => {
+                const titles = {
+                    'todo': '해야할 일',
+                    'progress': '진행중인 일',
+                    'done': '완료된 일'
+                };
+
+                listHTML += `
+                    <div class="task-category">
+                        <h3>${titles[status]}</h3>
+                        <div class="category-content">
+                        ${tasks[status].map(task => `
+                            <div class="task-list-item">
+                                <div class="task-text">${task.text}</div>
+                                ${task.dueDate ? `<div class="task-date">기한: ${task.dueDate}</div>` : ''}
+                                ${task.memo ? `<div class="task-memo">메모: ${task.memo}</div>` : ''}
+                            </div>
+                        `).join('') || '<div class="no-tasks">등록된 업무가 없습니다.</div>'}
+                        </div>
+                    </div>
+                `;
+            });
+
+            content.innerHTML = listHTML;
+            modal.style.display = "block";
+        }
+
+        function closeTaskList() {
+            document.getElementById('taskListModal').style.display = "none";
+            const taskInput = document.querySelector('.task-input');
+            taskInput.style.display = 'block'; // 업무 추가 창 다시 보이기
+        }
+
+        function printTaskList() {
+            window.print();
+        }
+
+        // 화면 크기 변경 시 리렌더링
+        window.addEventListener('resize', () => {
+            renderTasks();
+        });
+
+        // 메모 관련 함수들 수정
+        function toggleMemo(id, status) {
+            console.log('Toggle memo:', id, status);
+            const taskIndex = tasks[status].findIndex(task => task.id === id);
+            if (taskIndex !== -1) {
+                tasks[status][taskIndex].showMemo = !tasks[status][taskIndex].showMemo;
+                renderTasks();
+                
+                // 메모창이 열린 후 textarea에 포커스 주기
+                setTimeout(() => {
+                    const memoInput = document.getElementById(`memo-${id}`);
+                    if (memoInput && tasks[status][taskIndex].showMemo) {
+                        memoInput.focus();
+                        // 커서를 텍스트 끝으로 이동
+                        const length = memoInput.value.length;
+                        memoInput.setSelectionRange(length, length);
+                    }
+                }, 100);
+            }
+        }
+
+        function saveMemo(id, status) {
+            console.log('Save memo:', id, status);
+            const taskIndex = tasks[status].findIndex(task => task.id === id);
+            if (taskIndex !== -1) {
+                const memoInput = document.getElementById(`memo-${id}`);
+                if (memoInput) {
+                    tasks[status][taskIndex].memo = memoInput.value.trim();
+                    tasks[status][taskIndex].showMemo = false;
+                    saveTasks();
+                }
+            }
+        }
+
+        function cancelMemo(id, status) {
+            console.log('Cancel memo:', id, status);
+            const taskIndex = tasks[status].findIndex(task => task.id === id);
+            if (taskIndex !== -1) {
+                tasks[status][taskIndex].showMemo = false;
+                renderTasks();
+            }
+        }
+
+        // 새로운 태스크 추가
+        function addTask(status) {
+            const input = document.getElementById('todoInput');
+            const dateInput = document.getElementById('todoDate');
+            const text = input.value.trim();
+            const dueDate = dateInput.value;
+            
+            if (text) {
+                const task = {
+                    id: Date.now(),
+                    text: text,
+                    memo: '',
+                    showMemo: false,
+                    dueDate: dueDate
+                };
+                
+                if (!tasks[status]) {
+                    tasks[status] = [];
+                }
+                
+                tasks[status].push(task);
+                saveTasks();
+                input.value = '';
+                dateInput.value = '';
+            }
+        }
+
+        // Firebase에 저장
+        function saveTasks() {
+            try {
+                // Firebase 연결 확인
+                if (!window.db || !window.dbRef) {
+                    console.error("Firebase가 초기화되지 않았습니다.");
+                    localStorage.setItem('tasks', JSON.stringify(tasks)); // 로컬 스토리지에 임시 저장
+                    renderTasks();
+                    return;
+                }
+
+                const tasksRef = window.dbRef(window.db, 'tasks');
+                window.dbSet(tasksRef, tasks)
+                    .then(() => {
+                        console.log("Firebase에 성공적으로 저장되었습니다.");
+                        renderTasks();
+                    })
+                    .catch((error) => {
+                        console.error("Firebase 저장 오류:", error);
+                        // Firebase 저장 실패 시 로컬 스토리지에 백업
+                        localStorage.setItem('tasks', JSON.stringify(tasks));
+                        renderTasks();
+                    });
+            } catch (error) {
+                console.error("저장 중 오류 발생:", error);
+                // 오류 발생 시 로컬 스토리지에 백업
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                renderTasks();
+            }
+        }
+
+        // 태스크 이동
+        function moveTask(id, fromStatus, toStatus) {
+            console.log('Move task:', id, fromStatus, toStatus);
+            const taskIndex = tasks[fromStatus].findIndex(task => task.id === id);
+            if (taskIndex !== -1) {
+                const task = tasks[fromStatus][taskIndex];
+                tasks[fromStatus].splice(taskIndex, 1);
+                if (!tasks[toStatus]) {
+                    tasks[toStatus] = [];
+                }
+                tasks[toStatus].push(task);
+                saveTasks();
+            }
+        }
+
+        // 태스크 수정
+        function editTask(id, status) {
+            console.log('Edit task:', id, status);
+            const taskIndex = tasks[status].findIndex(task => task.id === id);
+            if (taskIndex !== -1) {
+                const task = tasks[status][taskIndex];
+                const newText = prompt('업무 내용을 수정하세요:', task.text);
+                if (newText && newText.trim()) {
+                    task.text = newText.trim();
+                    saveTasks();
+                }
+            }
+        }
+
+        // 태스크 삭제
+        function deleteTask(id, status) {
+            console.log('Delete task:', id, status);
+            const taskIndex = tasks[status].findIndex(task => task.id === id);
+            if (taskIndex !== -1) {
+                tasks[status].splice(taskIndex, 1);
+                saveTasks();
+            }
+        }
+
+        // 로그인 상태 확인
+        function checkLoginStatus() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            if (!isLoggedIn) {
+                showLoginModal();
+            } else {
+                hideLoginModal();
+                showMainContent();
+            }
+        }
+
+        // 로그인 모달 표시
+        function showLoginModal() {
+            const modal = document.getElementById('loginModal');
+            modal.style.display = 'block';
+            document.querySelector('.container').style.display = 'none';
+        }
+
+        // 로그인 모달 숨기기
+        function hideLoginModal() {
+            const modal = document.getElementById('loginModal');
+            modal.style.display = 'none';
+        }
+
+        // 메인 컨텐츠 표시
+        function showMainContent() {
+            document.querySelector('.container').style.display = 'block';
+        }
+
+        // 비밀번호 변경 관련 함수들
+        function showPasswordChangeModal() {
+            const modal = document.getElementById('passwordChangeModal');
+            modal.style.display = 'block';
+            
+            // 입력 필드 초기화
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            
+            // 버튼 초기 상태 설정
+            const changeButton = document.getElementById('changePasswordButton');
+            changeButton.style.backgroundColor = '#2980b9';
+            changeButton.style.opacity = '1';
+            
+            // 입력 필드 이벤트 리스너 설정
+            setupPasswordChangeListeners();
+        }
+
+        function setupPasswordChangeListeners() {
+            const currentPassword = document.getElementById('currentPassword');
+            const newPassword = document.getElementById('newPassword');
+            const confirmPassword = document.getElementById('confirmPassword');
+            const changeButton = document.getElementById('changePasswordButton');
+            
+            // 실시간 입력 감지
+            const checkInputs = () => {
+                const current = currentPassword.value.trim();
+                const newPw = newPassword.value.trim();
+                const confirm = confirmPassword.value.trim();
+                
+                // 모든 필드가 채워져 있고, 새 비밀번호와 확인이 일치하는지 확인
+                const isValid = current.length > 0 && newPw.length > 0 && confirm.length > 0;
+                
+                if (isValid) {
+                    changeButton.style.backgroundColor = '#2980b9';
+                    changeButton.style.opacity = '1';
+                    changeButton.style.cursor = 'pointer';
+                } else {
+                    changeButton.style.backgroundColor = '#cccccc';
+                    changeButton.style.opacity = '0.7';
+                    changeButton.style.cursor = 'not-allowed';
+                }
+            };
+
+            // 각 입력 필드에 이벤트 리스너 추가
+            [currentPassword, newPassword, confirmPassword].forEach(input => {
+                // 기존 이벤트 리스너 제거
+                input.removeEventListener('input', checkInputs);
+                input.removeEventListener('keyup', checkInputs);
+                
+                // 새 이벤트 리스너 추가
+                input.addEventListener('input', checkInputs);
+                input.addEventListener('keyup', checkInputs);
+            });
+        }
+
+        function handlePasswordChange() {
+            const currentPassword = document.getElementById('currentPassword').value.trim();
+            const newPassword = document.getElementById('newPassword').value.trim();
+            const confirmPassword = document.getElementById('confirmPassword').value.trim();
+            
+            // 현재 비밀번호 확인
+            const correctPassword = localStorage.getItem('password') || "1234";
+            
+            if (currentPassword !== correctPassword) {
+                alert('현재 비밀번호가 일치하지 않습니다.');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                alert('새 비밀번호가 일치하지 않습니다.');
+                return;
+            }
+            
+            // 비밀번호 변경 저장
+            localStorage.setItem('password', newPassword);
+            alert('비밀번호가 성공적으로 변경되었습니다.');
+            closePasswordChangeModal();
+        }
+
+        function closePasswordChangeModal() {
+            const modal = document.getElementById('passwordChangeModal');
+            modal.style.display = 'none';
+        }
+
+        // 모달 외부 클릭 시 닫기
+        window.onclick = function(event) {
+            const modal = document.getElementById('passwordChangeModal');
+            if (event.target === modal) {
+                closePasswordChangeModal();
+            }
+        }
+
+        // 페이지 로드 시 이벤트 리스너 추가
+        document.addEventListener('DOMContentLoaded', () => {
+            // 로그인 상태 확인
+            checkLoginStatus();
+            
+            // Enter 키로 태스크 추가
+            document.getElementById('todoInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addTask('todo');
+                }
+            });
+
+            // Firebase에서 데이터 로드
+            loadTasks();
+        });
+    </script>
+</body>
+</html>

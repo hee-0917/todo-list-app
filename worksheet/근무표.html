@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4월 근무표</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            padding: 10px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            width: 98%;
+            margin: 0 auto;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 5px;
+            text-align: center;
+            width: 28px;
+            min-width: 28px;
+            max-width: 28px;
+            height: 28px;
+            overflow: hidden;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-size: 0.85em;
+        }
+
+        .id-cell {
+            width: 50px;
+            min-width: 50px;
+            max-width: 50px;
+            background-color: #f8f9fa;
+            font-weight: normal;
+            color: #666;
+            position: sticky;
+            left: 0;
+            z-index: 1;
+        }
+
+        .name-cell {
+            width: 60px;
+            min-width: 60px;
+            max-width: 60px;
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+            position: sticky;
+            left: 50px;
+            z-index: 1;
+        }
+
+        .header-id {
+            width: 50px;
+            min-width: 50px;
+            max-width: 50px;
+            background-color: #f8f9fa;
+            position: sticky;
+            left: 0;
+            z-index: 2;
+        }
+
+        .header-name {
+            width: 60px;
+            min-width: 60px;
+            max-width: 60px;
+            background-color: #f8f9fa;
+            position: sticky;
+            left: 50px;
+            z-index: 2;
+        }
+
+        td:not(.name-cell) {
+            font-size: 0.85em;
+            white-space: nowrap;
+        }
+
+        .duty-selector {
+            position: absolute;
+            background: white;
+            padding: 4px;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 1000;
+            white-space: nowrap;
+        }
+
+        .duty-selector button {
+            margin: 1px;
+            padding: 3px 8px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            cursor: pointer;
+            background-color: #f8f9fa;
+            font-size: 0.85em;
+        }
+
+        .duty-selector button:hover {
+            background-color: #e9ecef;
+        }
+
+        .saturday {
+            color: blue;
+        }
+
+        .sunday {
+            color: red;
+        }
+
+        .duty-sat {
+            color: blue;
+        }
+
+        .duty-sun {
+            color: red;
+        }
+
+        .button-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+        }
+
+        .excel-button {
+            background-color: #217346;
+        }
+
+        .excel-button:hover {
+            background-color: #1a5c38;
+        }
+
+        .pdf-button {
+            background-color: #ff0000;
+        }
+
+        .pdf-button:hover {
+            background-color: #cc0000;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: relative;
+            width: 90%;
+            height: 90%;
+            margin: 2% auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        #pdfPreview {
+            width: 100%;
+            height: calc(100% - 40px);
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>2024년 4월 근무표</h1>
+        <div class="button-container">
+            <button class="action-button excel-button" onclick="exportToExcel()">엑셀로 저장</button>
+            <button class="action-button pdf-button" onclick="showPdfPreview()">PDF 미리보기</button>
+        </div>
+        <table id="scheduleTable">
+            <thead>
+                <tr>
+                    <th class="header-id">사번</th>
+                    <th class="header-name">이름</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="duty-selector" id="dutySelector">
+        <button onclick="updateDuty('D')">D</button>
+        <button onclick="updateDuty('Y')">Y</button>
+        <button onclick="updateDuty('Y/2')">Y/2</button>
+        <button onclick="updateDuty('OFF')">OFF</button>
+    </div>
+
+    <div id="pdfModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closePdfPreview()">&times;</span>
+            <iframe id="pdfPreview"></iframe>
+        </div>
+    </div>
+
+    <script>
+        const workers = [
+            { id: '1234', name: '이정희' },
+            { id: '1235', name: '이현진' },
+            { id: '1236', name: '박지윤' },
+            { id: '1237', name: '김효은' },
+            { id: '1238', name: '조은영' },
+            { id: '1239', name: '김효경' },
+            { id: '1240', name: '손영미' },
+            { id: '1241', name: '손혁수' },
+            { id: '1242', name: '강경은' }
+        ];
+
+        let selectedCell = null;
+
+        function initializeSchedule() {
+            const table = document.getElementById('scheduleTable');
+            const headerRow = table.querySelector('thead tr');
+            const tbody = table.querySelector('tbody');
+
+            for (let day = 1; day <= 30; day++) {
+                const th = document.createElement('th');
+                const dayOfWeek = (day + 1) % 7;
+                
+                if (dayOfWeek === 4) {
+                    th.className = 'saturday';
+                } else if (dayOfWeek === 5) {
+                    th.className = 'sunday';
+                }
+                
+                th.textContent = day;
+                headerRow.appendChild(th);
+            }
+
+            // 근무자별 행 생성
+            workers.forEach(worker => {
+                const tr = document.createElement('tr');
+                
+                // 사번 셀
+                const idCell = document.createElement('td');
+                idCell.className = 'id-cell';
+                idCell.textContent = worker.id;
+                tr.appendChild(idCell);
+
+                // 이름 셀
+                const nameCell = document.createElement('td');
+                nameCell.className = 'name-cell';
+                nameCell.textContent = worker.name;
+                tr.appendChild(nameCell);
+
+                // 날짜별 근무 셀 생성
+                for (let day = 1; day <= 30; day++) {
+                    const td = document.createElement('td');
+                    const dayOfWeek = (day + 1) % 7;
+
+                    if (dayOfWeek === 5) {
+                        td.textContent = 'OFF';
+                        td.className = 'duty-sun';
+                    } else {
+                        td.textContent = 'D';
+                        if (dayOfWeek === 4) {
+                            td.className = 'duty-sat';
+                        }
+                    }
+                    
+                    // 클릭 이벤트 추가
+                    td.onclick = function() {
+                        showDutySelector(td);
+                    };
+                    
+                    tr.appendChild(td);
+                }
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        function showDutySelector(cell) {
+            const selector = document.getElementById('dutySelector');
+            selectedCell = cell;
+
+            // 셀의 위치 계산
+            const cellRect = cell.getBoundingClientRect();
+            const scrollX = window.scrollX || window.pageXOffset;
+            const scrollY = window.scrollY || window.pageYOffset;
+
+            // 선택기를 셀 오른쪽에 배치
+            selector.style.left = (cellRect.right + scrollX) + 'px';
+            selector.style.top = (cellRect.top + scrollY) + 'px';
+            selector.style.display = 'block';
+
+            // 다른 곳 클릭시 선택기 닫기
+            document.addEventListener('click', closeOnClickOutside);
+        }
+
+        function closeOnClickOutside(event) {
+            const selector = document.getElementById('dutySelector');
+            if (!selector.contains(event.target) && event.target !== selectedCell) {
+                selector.style.display = 'none';
+                document.removeEventListener('click', closeOnClickOutside);
+                selectedCell = null;
+            }
+        }
+
+        function updateDuty(dutyType) {
+            if (selectedCell) {
+                selectedCell.textContent = dutyType;
+                
+                // 토/일요일 색상 유지
+                if (selectedCell.classList.contains('duty-sat')) {
+                    selectedCell.style.color = 'blue';
+                } else if (selectedCell.classList.contains('duty-sun')) {
+                    selectedCell.style.color = 'red';
+                } else {
+                    selectedCell.style.color = 'black';
+                }
+
+                // 선택기 닫기
+                document.getElementById('dutySelector').style.display = 'none';
+                selectedCell = null;
+            }
+        }
+
+        function exportToExcel() {
+            const today = new Date();
+            const dateString = `${today.getFullYear()}${(today.getMonth()+1).toString().padStart(2, '0')}${today.getDate().toString().padStart(2, '0')}`;
+            
+            const table = document.getElementById('scheduleTable');
+            const wb = XLSX.utils.book_new();
+            
+            const data = [];
+            
+            // 제목 행 추가
+            data.push(['2024년 4월 근무표']);
+            data.push([]); // 빈 행 추가
+            
+            const headerRow = ['사번', '이름'];
+            for (let day = 1; day <= 30; day++) {
+                headerRow.push(day.toString());
+            }
+            data.push(headerRow);
+            
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const rowData = [];
+                const cells = row.querySelectorAll('td');
+                cells.forEach(cell => {
+                    rowData.push(cell.textContent);
+                });
+                data.push(rowData);
+            });
+            
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            
+            // 열 너비 설정 - 정확한 수치 적용
+            const colWidths = [
+                { wch: 3.91 },  // 사번 열
+                { wch: 5.45 },  // 이름 열
+                ...Array(30).fill({ wch: 2.45 })  // 날짜 열들
+            ];
+            ws['!cols'] = colWidths;
+
+            // 행 높이 설정 - 32.4로 통일
+            ws['!rows'] = Array(data.length).fill({ hpt: 32.4 });
+
+            // 제목 행 병합
+            ws['!merges'] = [
+                { s: { r: 0, c: 0 }, e: { r: 0, c: 31 } } // 첫 번째 행 전체 병합
+            ];
+
+            // 스타일 설정
+            for (let i = 0; i < data.length; i++) {
+                for (let j = 0; j < data[i].length; j++) {
+                    const cellRef = XLSX.utils.encode_cell({ r: i, c: j });
+                    if (!ws[cellRef]) ws[cellRef] = {};
+                    
+                    // 제목 행 스타일
+                    if (i === 0) {
+                        ws[cellRef].s = {
+                            font: { bold: true, sz: 15 },  // 제목 글꼴 크기 15
+                            alignment: { horizontal: 'center', vertical: 'center' }
+                        };
+                    }
+                    // 헤더 행 스타일 (사번, 이름, 날짜)
+                    else if (i === 2) {
+                        ws[cellRef].s = {
+                            fill: { fgColor: { rgb: "E2E2E2" } },
+                            font: { bold: true, sz: 10 },  // 헤더 진하게
+                            alignment: { horizontal: 'center', vertical: 'center' },
+                            border: {
+                                top: { style: 'thin' },
+                                bottom: { style: 'thin' },
+                                left: { style: 'thin' },
+                                right: { style: 'thin' }
+                            }
+                        };
+                    }
+                    // 데이터 행 스타일
+                    else if (i > 2) {
+                        ws[cellRef].s = {
+                            font: { sz: 10 },  // 데이터 글꼴 크기 10
+                            alignment: { horizontal: 'center', vertical: 'center' },  // 모든 내용 가운데 정렬
+                            border: {
+                                top: { style: 'thin' },
+                                bottom: { style: 'thin' },
+                                left: { style: 'thin' },
+                                right: { style: 'thin' }
+                            }
+                        };
+                    }
+                }
+            }
+
+            // 페이지 설정
+            ws['!pageSetup'] = {
+                orientation: 'landscape', // 가로 방향
+                fitToPage: true,         // 한 페이지에 맞추기
+                fitToHeight: 1,          // 세로 1페이지
+                fitToWidth: 1            // 가로 1페이지
+            };
+
+            XLSX.utils.book_append_sheet(wb, ws, "4월근무표");
+            
+            XLSX.writeFile(wb, `근무표_${dateString}.xlsx`);
+        }
+
+        function showPdfPreview() {
+            const element = document.querySelector('.container');
+            const options = {
+                margin: 10,
+                filename: '근무표.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2,
+                    scrollY: -window.scrollY,
+                    windowWidth: document.documentElement.offsetWidth,
+                    windowHeight: document.documentElement.offsetHeight
+                },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            };
+
+            // 모달 먼저 표시
+            const modal = document.getElementById('pdfModal');
+            modal.style.display = 'block';
+
+            // PDF 생성 및 표시
+            html2pdf().set(options).from(element).save().then(() => {
+                html2pdf().set(options).from(element).output('datauristring').then((pdfAsString) => {
+                    const pdfPreview = document.getElementById('pdfPreview');
+                    pdfPreview.src = pdfAsString;
+                });
+            });
+        }
+
+        function closePdfPreview() {
+            const modal = document.getElementById('pdfModal');
+            const pdfPreview = document.getElementById('pdfPreview');
+            pdfPreview.src = '';
+            modal.style.display = 'none';
+        }
+
+        // 모달 외부 클릭시 닫기
+        window.onclick = function(event) {
+            const modal = document.getElementById('pdfModal');
+            if (event.target == modal) {
+                closePdfPreview();
+            }
+        }
+
+        initializeSchedule();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025년 삼성 라이온즈 홈경기 일정</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 100%;
+            padding: 10px;
+            margin: 0 auto;
+        }
+
+        .header-container {
+            text-align: center;
+            padding: 15px 0;
+            border-bottom: 3px solid #1E4B8D;
+            margin-bottom: 20px;
+        }
+
+        .main-title {
+            color: #1E4B8D;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 0;
+            word-break: keep-all;
+            line-height: 1.3;
+        }
+
+        .notice-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .notice {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+
+        .important {
+            color: #1E4B8D;
+            font-weight: bold;
+        }
+
+        .notice-warning {
+            color: #dc3545;
+            font-weight: bold;
+            font-size: 1.1em;
+            white-space: nowrap;
+        }
+
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+        }
+
+        .schedule-table th,
+        .schedule-table td {
+            padding: 8px 4px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        .schedule-table th {
+            background-color: #1E4B8D;
+            color: white;
+        }
+
+        .ticket-checkbox {
+            width: 16px;
+            height: 16px;
+        }
+
+        .memo-btn {
+            padding: 4px 8px;
+            font-size: 0.8em;
+            background-color: #1E4B8D;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .completed-game {
+            text-decoration: line-through;
+            color: #888;
+        }
+
+        .weekend {
+            background-color: #f0f4f8;
+        }
+
+        .saturday {
+            color: #0066CC !important;
+            font-weight: bold;
+        }
+
+        .sunday {
+            color: #FF0000 !important;
+            font-weight: bold;
+        }
+
+        .completed-game .saturday {
+            color: #0066CC !important;
+        }
+
+        .completed-game .sunday {
+            color: #FF0000 !important;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                max-width: 1200px;
+                padding: 20px;
+            }
+
+            .main-title {
+                font-size: 2em;
+            }
+
+            .schedule-table {
+                font-size: 1em;
+            }
+
+            .schedule-table th,
+            .schedule-table td {
+                padding: 12px 8px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .notice-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+
+        /* 모달 스타일 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            max-height: 80vh; /* 화면 높이의 80%까지만 사용 */
+            background-color: white;
+            border-radius: 20px 20px 0 0;
+            padding: 20px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            transform: translateY(100%);
+            transition: transform 0.3s ease-out;
+            overflow-y: auto; /* 내용이 많을 경우 스크롤 가능하도록 */
+        }
+
+        .modal.show .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #1E4B8D;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: #666;
+            cursor: pointer;
+        }
+
+        .attendee-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 10px 0;
+            background-color: white;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        .attendee-input input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .add-btn {
+            padding: 12px 20px;
+            background-color: #1E4B8D;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .attendees-list {
+            margin-bottom: 20px;
+        }
+
+        .attendee-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .memo-buttons {
+            position: sticky;
+            bottom: 0;
+            background-color: white;
+            padding: 15px 0;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .close-memo-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #1E4B8D;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        /* 모바일 터치 최적화 */
+        @media (max-width: 768px) {
+            .modal-content {
+                padding: 15px;
+            }
+
+            .attendee-input input,
+            .add-btn,
+            .delete-btn,
+            .close-memo-btn {
+                font-size: 16px;
+                min-height: 44px;
+            }
+
+            .attendee-item {
+                padding: 12px;
+            }
+        }
+
+        /* 안전한 영역 확보 (iPhone X 이상) */
+        @supports (padding: max(0px)) {
+            .modal-content {
+                padding-bottom: max(20px, env(safe-area-inset-bottom));
+            }
+        }
+    </style>
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Firebase SDK 임포트
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, get, set, onValue, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // Firebase 설정
+        const firebaseConfig = {
+            apiKey: "AIzaSyBeiAB0etYuTLWz8uml6xiW3hxeTmWmrrg",
+            authDomain: "sl-schedule-42e24.firebaseapp.com",
+            projectId: "sl-schedule-42e24",
+            storageBucket: "sl-schedule-42e24.firebasestorage.app",
+            messagingSenderId: "104322155697",
+            appId: "1:104322155697:web:713ebbdf32ac0c6fda8e90",
+            databaseURL: "https://sl-schedule-42e24-default-rtdb.asia-southeast1.firebasedatabase.app"
+        };
+
+        // Firebase 초기화
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // 전역 변수로 내보내기
+        window.db = database;
+        window.dbRef = ref;
+        window.dbGet = get;
+        window.dbSet = set;
+        window.dbOnValue = onValue;
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header-container">
+            <h1 class="main-title">정희의 2025년 삼성 라이온즈 홈경기 일정</h1>
+        </div>
+
+        <div class="notice-container">
+            <div class="notice">
+                <strong>※ 선예매 안내</strong><br>
+                - 화/수/목 경기: <span class="important">일주일 전 일요일 오후 2시</span><br>
+                - 금/토/일 경기: <span class="important">일주일 전 수요일 오후 2시</span>
+            </div>
+            <div class="notice-warning">
+                ⚠️ 무조건 선착순 예매 !!
+            </div>
+        </div>
+
+        <table class="schedule-table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>경기일</th>
+                    <th>요일</th>
+                    <th>시간</th>
+                    <th>상대팀</th>
+                    <th>구장</th>
+                    <th>선예매일</th>
+                    <th>메모</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- 4월 경기 -->
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>4/4</td>
+                    <td>금</td>
+                    <td>18:30</td>
+                    <td>한화</td>
+                    <td>대구</td>
+                    <td>3/26(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-04-04">메모</button></td>
+                </tr>
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>4/5</td>
+                    <td class="saturday">토</td>
+                    <td>14:00</td>
+                    <td>한화</td>
+                    <td>대구</td>
+                    <td>3/26(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-04-05">메모</button></td>
+                </tr>
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>4/6</td>
+                    <td class="sunday">일</td>
+                    <td>14:00</td>
+                    <td>한화</td>
+                    <td>대구</td>
+                    <td>3/26(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-04-06">메모</button></td>
+                </tr>
+                <tr class="home-game">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>4/8</td>
+                    <td>화</td>
+                    <td>18:30</td>
+                    <td>SSG</td>
+                    <td>대구</td>
+                    <td>3/30(일) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-04-08">메모</button></td>
+                </tr>
+                <tr class="home-game">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>4/9</td>
+                    <td>수</td>
+                    <td>18:30</td>
+                    <td>SSG</td>
+                    <td>대구</td>
+                    <td>3/30(일) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-04-09">메모</button></td>
+                </tr>
+                <tr class="home-game">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>4/10</td>
+                    <td>목</td>
+                    <td>18:30</td>
+                    <td>SSG</td>
+                    <td>대구</td>
+                    <td>3/30(일) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-04-10">메모</button></td>
+                </tr>
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>4/18</td>
+                    <td>금</td>
+                    <td>18:30</td>
+                    <td>롯데</td>
+                    <td>대구</td>
+                    <td>4/9(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-04-18">메모</button></td>
+                </tr>
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>4/19</td>
+                    <td class="saturday">토</td>
+                    <td>14:00</td>
+                    <td>롯데</td>
+                    <td>대구</td>
+                    <td>4/9(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-04-19">메모</button></td>
+                </tr>
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>4/20</td>
+                    <td class="sunday">일</td>
+                    <td>14:00</td>
+                    <td>롯데</td>
+                    <td>대구</td>
+                    <td>4/9(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-04-20">메모</button></td>
+                </tr>
+                <tr class="home-game">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>4/22</td>
+                    <td>화</td>
+                    <td>18:30</td>
+                    <td>KIA</td>
+                    <td>대구</td>
+                    <td>4/13(일) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-04-22">메모</button></td>
+                </tr>
+                <tr class="home-game">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>4/23</td>
+                    <td>수</td>
+                    <td>18:30</td>
+                    <td>KIA</td>
+                    <td>대구</td>
+                    <td>4/13(일) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-04-23">메모</button></td>
+                </tr>
+                <tr class="home-game">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>4/24</td>
+                    <td>목</td>
+                    <td>18:30</td>
+                    <td>KIA</td>
+                    <td>대구</td>
+                    <td>4/13(일) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-04-24">메모</button></td>
+                </tr>
+
+                <!-- 5월 경기 -->
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>5/2</td>
+                    <td>금</td>
+                    <td>18:30</td>
+                    <td>두산</td>
+                    <td>대구</td>
+                    <td>4/23(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-05-02">메모</button></td>
+                </tr>
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>5/3</td>
+                    <td class="saturday">토</td>
+                    <td>14:00</td>
+                    <td>두산</td>
+                    <td>대구</td>
+                    <td>4/23(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-05-03">메모</button></td>
+                </tr>
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>5/4</td>
+                    <td class="sunday">일</td>
+                    <td>14:00</td>
+                    <td>두산</td>
+                    <td>대구</td>
+                    <td>4/23(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-05-04">메모</button></td>
+                </tr>
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>5/9</td>
+                    <td>금</td>
+                    <td>18:30</td>
+                    <td>LG</td>
+                    <td>대구</td>
+                    <td>4/30(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-05-09">메모</button></td>
+                </tr>
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>5/10</td>
+                    <td class="saturday">토</td>
+                    <td>14:00</td>
+                    <td>LG</td>
+                    <td>대구</td>
+                    <td>4/30(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-05-10">메모</button></td>
+                </tr>
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>5/11</td>
+                    <td class="sunday">일</td>
+                    <td>14:00</td>
+                    <td>LG</td>
+                    <td>대구</td>
+                    <td>4/30(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-05-11">메모</button></td>
+                </tr>
+                <tr class="home-game">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>5/13</td>
+                    <td>화</td>
+                    <td>18:30</td>
+                    <td>NC</td>
+                    <td>포항</td>
+                    <td>5/4(일) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-05-13">메모</button></td>
+                </tr>
+                <tr class="home-game">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>5/14</td>
+                    <td>수</td>
+                    <td>18:30</td>
+                    <td>NC</td>
+                    <td>포항</td>
+                    <td>5/4(일) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-05-14">메모</button></td>
+                </tr>
+                <tr class="home-game">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>5/15</td>
+                    <td>목</td>
+                    <td>18:30</td>
+                    <td>NC</td>
+                    <td>포항</td>
+                    <td>5/4(일) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-05-15">메모</button></td>
+                </tr>
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>5/23</td>
+                    <td>금</td>
+                    <td>18:30</td>
+                    <td>KIA</td>
+                    <td>대구</td>
+                    <td>5/14(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-05-23">메모</button></td>
+                </tr>
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>5/24</td>
+                    <td class="saturday">토</td>
+                    <td>14:00</td>
+                    <td>KIA</td>
+                    <td>대구</td>
+                    <td>5/14(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-05-24">메모</button></td>
+                </tr>
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>5/25</td>
+                    <td class="sunday">일</td>
+                    <td>14:00</td>
+                    <td>KIA</td>
+                    <td>대구</td>
+                    <td>5/14(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-05-25">메모</button></td>
+                </tr>
+                <tr class="home-game">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>5/27</td>
+                    <td>화</td>
+                    <td>18:30</td>
+                    <td>롯데</td>
+                    <td>대구</td>
+                    <td>5/18(일) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-05-27">메모</button></td>
+                </tr>
+                <tr class="home-game">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>5/28</td>
+                    <td>수</td>
+                    <td>18:30</td>
+                    <td>롯데</td>
+                    <td>대구</td>
+                    <td>5/18(일) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-05-28">메모</button></td>
+                </tr>
+                <tr class="home-game">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>5/29</td>
+                    <td>목</td>
+                    <td>18:30</td>
+                    <td>롯데</td>
+                    <td>대구</td>
+                    <td>5/18(일) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-05-29">메모</button></td>
+                </tr>
+
+                <!-- 6월 경기 -->
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>6/6</td>
+                    <td>금</td>
+                    <td>18:30</td>
+                    <td>NC</td>
+                    <td>대구</td>
+                    <td>5/28(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-06-06">메모</button></td>
+                </tr>
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>6/7</td>
+                    <td class="saturday">토</td>
+                    <td>14:00</td>
+                    <td>NC</td>
+                    <td>대구</td>
+                    <td>5/28(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-06-07">메모</button></td>
+                </tr>
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>6/8</td>
+                    <td class="sunday">일</td>
+                    <td>14:00</td>
+                    <td>NC</td>
+                    <td>대구</td>
+                    <td>5/28(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-06-08">메모</button></td>
+                </tr>
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>6/13</td>
+                    <td>금</td>
+                    <td>18:30</td>
+                    <td>KT</td>
+                    <td>대구</td>
+                    <td>6/4(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-06-13">메모</button></td>
+                </tr>
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>6/14</td>
+                    <td class="saturday">토</td>
+                    <td>14:00</td>
+                    <td>KT</td>
+                    <td>대구</td>
+                    <td>6/4(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-06-14">메모</button></td>
+                </tr>
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>6/15</td>
+                    <td class="sunday">일</td>
+                    <td>14:00</td>
+                    <td>KT</td>
+                    <td>대구</td>
+                    <td>6/4(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-06-15">메모</button></td>
+                </tr>
+                <tr class="home-game">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>6/17</td>
+                    <td>화</td>
+                    <td>18:30</td>
+                    <td>두산</td>
+                    <td>대구</td>
+                    <td>6/8(일) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-06-17">메모</button></td>
+                </tr>
+                <tr class="home-game">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>6/18</td>
+                    <td>수</td>
+                    <td>18:30</td>
+                    <td>두산</td>
+                    <td>대구</td>
+                    <td>6/8(일) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-06-18">메모</button></td>
+                </tr>
+                <tr class="home-game">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>6/19</td>
+                    <td>목</td>
+                    <td>18:30</td>
+                    <td>두산</td>
+                    <td>대구</td>
+                    <td>6/8(일) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-06-19">메모</button></td>
+                </tr>
+                <tr class="home-game">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>6/24</td>
+                    <td>화</td>
+                    <td>18:30</td>
+                    <td>한화</td>
+                    <td>대구</td>
+                    <td>6/15(일) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-06-24">메모</button></td>
+                </tr>
+                <tr class="home-game">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>6/25</td>
+                    <td>수</td>
+                    <td>18:30</td>
+                    <td>한화</td>
+                    <td>대구</td>
+                    <td>6/15(일) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-06-25">메모</button></td>
+                </tr>
+                <tr class="home-game">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>6/26</td>
+                    <td>목</td>
+                    <td>18:30</td>
+                    <td>한화</td>
+                    <td>대구</td>
+                    <td>6/15(일) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-06-26">메모</button></td>
+                </tr>
+
+                <!-- 7월 경기 -->
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>7/4</td>
+                    <td>금</td>
+                    <td>18:30</td>
+                    <td>LG</td>
+                    <td>대구</td>
+                    <td>6/25(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-07-04">메모</button></td>
+                </tr>
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>7/5</td>
+                    <td class="saturday">토</td>
+                    <td>14:00</td>
+                    <td>LG</td>
+                    <td>대구</td>
+                    <td>6/25(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-07-05">메모</button></td>
+                </tr>
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>7/6</td>
+                    <td class="sunday">일</td>
+                    <td>14:00</td>
+                    <td>LG</td>
+                    <td>대구</td>
+                    <td>6/25(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-07-06">메모</button></td>
+                </tr>
+                <tr class="home-game">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>7/17</td>
+                    <td>목</td>
+                    <td>18:30</td>
+                    <td>키움</td>
+                    <td>대구</td>
+                    <td>7/6(일) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-07-17">메모</button></td>
+                </tr>
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>7/18</td>
+                    <td>금</td>
+                    <td>18:30</td>
+                    <td>키움</td>
+                    <td>대구</td>
+                    <td>7/9(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-07-18">메모</button></td>
+                </tr>
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>7/19</td>
+                    <td class="saturday">토</td>
+                    <td>14:00</td>
+                    <td>키움</td>
+                    <td>대구</td>
+                    <td>7/9(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-07-19">메모</button></td>
+                </tr>
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>7/20</td>
+                    <td class="sunday">일</td>
+                    <td>14:00</td>
+                    <td>키움</td>
+                    <td>대구</td>
+                    <td>7/9(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-07-20">메모</button></td>
+                </tr>
+                <tr class="home-game">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>7/22</td>
+                    <td>화</td>
+                    <td>18:30</td>
+                    <td>SSG</td>
+                    <td>대구</td>
+                    <td>7/13(일) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-07-22">메모</button></td>
+                </tr>
+                <tr class="home-game">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>7/23</td>
+                    <td>수</td>
+                    <td>18:30</td>
+                    <td>SSG</td>
+                    <td>대구</td>
+                    <td>7/13(일) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-07-23">메모</button></td>
+                </tr>
+                <tr class="home-game">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>7/24</td>
+                    <td>목</td>
+                    <td>18:30</td>
+                    <td>SSG</td>
+                    <td>대구</td>
+                    <td>7/13(일) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-07-24">메모</button></td>
+                </tr>
+
+                <!-- 8월 경기 -->
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>8/1</td>
+                    <td>금</td>
+                    <td>18:30</td>
+                    <td>LG</td>
+                    <td>대구</td>
+                    <td>7/23(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-08-01">메모</button></td>
+                </tr>
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>8/2</td>
+                    <td class="saturday">토</td>
+                    <td>14:00</td>
+                    <td>LG</td>
+                    <td>대구</td>
+                    <td>7/23(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-08-02">메모</button></td>
+                </tr>
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>8/3</td>
+                    <td class="sunday">일</td>
+                    <td>14:00</td>
+                    <td>LG</td>
+                    <td>대구</td>
+                    <td>7/23(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-08-03">메모</button></td>
+                </tr>
+                <tr class="home-game">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>8/12</td>
+                    <td>화</td>
+                    <td>18:30</td>
+                    <td>KIA</td>
+                    <td>대구</td>
+                    <td>8/3(일) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-08-12">메모</button></td>
+                </tr>
+                <tr class="home-game">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>8/13</td>
+                    <td>수</td>
+                    <td>18:30</td>
+                    <td>KIA</td>
+                    <td>대구</td>
+                    <td>8/3(일) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-08-13">메모</button></td>
+                </tr>
+                <tr class="home-game">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>8/14</td>
+                    <td>목</td>
+                    <td>18:30</td>
+                    <td>KIA</td>
+                    <td>대구</td>
+                    <td>8/3(일) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-08-14">메모</button></td>
+                </tr>
+                <tr class="home-game">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>8/19</td>
+                    <td>화</td>
+                    <td>18:30</td>
+                    <td>NC</td>
+                    <td>대구</td>
+                    <td>8/10(일) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-08-19">메모</button></td>
+                </tr>
+                <tr class="home-game">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>8/20</td>
+                    <td>수</td>
+                    <td>18:30</td>
+                    <td>NC</td>
+                    <td>대구</td>
+                    <td>8/10(일) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-08-20">메모</button></td>
+                </tr>
+                <tr class="home-game">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>8/21</td>
+                    <td>목</td>
+                    <td>18:30</td>
+                    <td>NC</td>
+                    <td>대구</td>
+                    <td>8/10(일) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-08-21">메모</button></td>
+                </tr>
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>8/22</td>
+                    <td>금</td>
+                    <td>18:30</td>
+                    <td>키움</td>
+                    <td>대구</td>
+                    <td>8/13(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-08-22">메모</button></td>
+                </tr>
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>8/23</td>
+                    <td class="saturday">토</td>
+                    <td>14:00</td>
+                    <td>키움</td>
+                    <td>대구</td>
+                    <td>8/13(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-08-23">메모</button></td>
+                </tr>
+                <tr class="home-game weekend">
+                    <td><input type="checkbox" class="ticket-checkbox"></td>
+                    <td>8/24</td>
+                    <td class="sunday">일</td>
+                    <td>14:00</td>
+                    <td>키움</td>
+                    <td>대구</td>
+                    <td>8/13(수) 14:00</td>
+                    <td><button class="memo-btn" data-game-date="2025-08-24">메모</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 모달 HTML -->
+    <div id="memoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"></h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="attendee-input">
+                <input type="text" id="attendeeName" placeholder="관람자 이름을 입력하세요">
+                <button class="add-btn">추가</button>
+            </div>
+            <div class="attendees-list"></div>
+            <div class="memo-buttons">
+                <button class="close-memo-btn">닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentGameDate = '';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const modal = document.getElementById('memoModal');
+            const closeBtn = modal.querySelector('.close-btn');
+            const addBtn = modal.querySelector('.add-btn');
+            const closeMemoBtn = modal.querySelector('.close-memo-btn');
+            const nameInput = document.getElementById('attendeeName');
+
+            document.querySelectorAll('.memo-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const gameDate = this.getAttribute('data-game-date');
+                    openMemo(gameDate);
+                });
+            });
+
+            closeBtn.addEventListener('click', closeMemo);
+            closeMemoBtn.addEventListener('click', closeMemo);
+            addBtn.addEventListener('click', addAttendee);
+            
+            nameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addAttendee();
+                }
+            });
+
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeMemo();
+                }
+            });
+
+            checkAllMemoStatus();
+        });
+
+        function checkAllMemoStatus() {
+            document.querySelectorAll('.memo-btn').forEach(button => {
+                const gameDate = button.getAttribute('data-game-date');
+                const dbRef = window.dbRef(window.db, `games/${gameDate}/attendees`);
+                
+                window.dbGet(dbRef)
+                    .then((snapshot) => {
+                        const data = snapshot.val();
+                        if (data && data.attendees && data.attendees.length > 0) {
+                            button.style.backgroundColor = '#dc3545';
+                        } else {
+                            button.style.backgroundColor = '#1E4B8D';
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("데이터 로드 중 오류 발생:", error);
+                        alert("데이터를 불러오는 중 오류가 발생했습니다.");
+                    });
+            });
+        }
+
+        function openMemo(date) {
+            currentGameDate = date;
+            const modal = document.getElementById('memoModal');
+            const modalTitle = modal.querySelector('.modal-title');
+            const dateObj = new Date(date);
+            const formattedDate = `${dateObj.getMonth() + 1}월 ${dateObj.getDate()}일 경기 관람자`;
+            
+            modalTitle.textContent = formattedDate;
+            modal.style.display = 'block';
+            modal.classList.add('show');
+
+            const dbRef = window.dbRef(window.db, `games/${date}/attendees`);
+            dbRef.on('value', (snapshot) => {
+                const data = snapshot.val() || { attendees: [] };
+                displayAttendees(data.attendees);
+                
+                const memoBtn = document.querySelector(`button[data-game-date="${date}"]`);
+                if (data.attendees && data.attendees.length > 0) {
+                    memoBtn.style.backgroundColor = '#dc3545';
+                } else {
+                    memoBtn.style.backgroundColor = '#1E4B8D';
+                }
+            });
+        }
+
+        function addAttendee() {
+            const nameInput = document.getElementById('attendeeName');
+            const name = nameInput.value.trim();
+            
+            if (name) {
+                const dbRef = window.dbRef(window.db, `games/${currentGameDate}/attendees`);
+                
+                window.dbGet(dbRef)
+                    .then((snapshot) => {
+                        let attendees = [];
+                        if (snapshot.exists()) {
+                            attendees = snapshot.val();
+                        }
+                        
+                        attendees.push(name);
+                        
+                        return window.dbSet(dbRef, attendees);
+                    })
+                    .then(() => {
+                        nameInput.value = '';
+                        nameInput.focus();
+                        
+                        const memoBtn = document.querySelector(`button[data-game-date="${currentGameDate}"]`);
+                        memoBtn.style.backgroundColor = '#dc3545';
+                    })
+                    .catch((error) => {
+                        console.error("저장 중 오류 발생:", error);
+                        alert("저장하는 중 오류가 발생했습니다.");
+                    });
+            }
+        }
+
+        function deleteAttendee(index) {
+            const dbRef = window.dbRef(window.db, `games/${currentGameDate}/attendees`);
+            
+            window.dbGet(dbRef)
+                .then((snapshot) => {
+                    if (snapshot.exists()) {
+                        let attendees = snapshot.val();
+                        attendees = attendees.filter((_, i) => i !== index);
+                        return window.dbSet(dbRef, attendees);
+                    }
+                })
+                .then(() => {
+                    const memoBtn = document.querySelector(`button[data-game-date="${currentGameDate}"]`);
+                    if (attendees.length === 0) {
+                        memoBtn.style.backgroundColor = '#1E4B8D';
+                    }
+                })
+                .catch((error) => {
+                    console.error("삭제 중 오류 발생:", error);
+                    alert("삭제하는 중 오류가 발생했습니다.");
+                });
+        }
+
+        function displayAttendees(attendees) {
+            const attendeesList = document.querySelector('.attendees-list');
+            attendeesList.innerHTML = '';
+            
+            if (Array.isArray(attendees) && attendees.length > 0) {
+                attendees.forEach((name, index) => {
+                    const attendeeItem = document.createElement('div');
+                    attendeeItem.className = 'attendee-item';
+                    attendeeItem.innerHTML = `
+                        <span>${name}</span>
+                        <button class="delete-btn" onclick="deleteAttendee(${index})">삭제</button>
+                    `;
+                    attendeesList.appendChild(attendeeItem);
+                });
+            }
+        }
+
+        function closeMemo() {
+            const modal = document.getElementById('memoModal');
+            modal.style.display = 'none';
+            modal.classList.remove('show');
+            document.getElementById('attendeeName').value = '';
+        }
+    </script>
+</body>
+</html>
