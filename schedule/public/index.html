@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>할 일 관리</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .column {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .column h2 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .task-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .task-input input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .task-input button {
+            padding: 8px 15px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .task-input button:hover {
+            background: #45a049;
+        }
+
+        .task-list {
+            min-height: 100px;
+        }
+
+        .task {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 10px;
+            cursor: move;
+        }
+
+        .task:hover {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .task-actions button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .edit-btn {
+            background: #2196F3;
+            color: white;
+        }
+
+        .delete-btn {
+            background: #f44336;
+            color: white;
+        }
+
+        .memo-btn {
+            background: #FFC107;
+            color: black;
+        }
+
+        .memo-container {
+            margin-top: 10px;
+            display: none;
+        }
+
+        .memo-container.active {
+            display: block;
+        }
+
+        .memo-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+
+        .memo-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .memo-actions button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .save-btn {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .cancel-btn {
+            background: #f44336;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .board {
+                grid-template-columns: 1fr;
+            }
+
+            .task-input {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .task-input input {
+                width: 100%;
+                padding: 12px;
+                font-size: 16px;
+            }
+
+            .task-input button {
+                width: 100%;
+                padding: 12px;
+                font-size: 16px;
+            }
+
+            .task-actions {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .task-actions button {
+                flex: 1 1 calc(50% - 8px);
+                padding: 10px;
+                font-size: 14px;
+                min-height: 40px;
+            }
+
+            .memo-container {
+                padding: 10px;
+            }
+
+            .memo-input {
+                padding: 12px;
+                font-size: 16px;
+                min-height: 100px;
+            }
+
+            .memo-actions {
+                gap: 8px;
+            }
+
+            .memo-actions button {
+                flex: 1;
+                padding: 10px;
+                font-size: 14px;
+            }
+        }
+
+        /* 터치 디바이스 최적화 */
+        @media (hover: none) {
+            .task-actions button {
+                min-height: 44px;
+                padding: 12px;
+            }
+
+            .task {
+                padding: 15px;
+            }
+
+            .memo-input {
+                -webkit-appearance: none;
+                appearance: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>할 일 관리</h1>
+        <div class="board">
+            <div class="column" id="todo">
+                <h2>해야 할 일</h2>
+                <div class="task-input">
+                    <input type="text" id="todoInput" placeholder="새로운 할 일...">
+                    <input type="date" id="todoDate">
+                    <button onclick="addTask('todo')">추가</button>
+                </div>
+                <div class="task-list" id="todoTasks"></div>
+            </div>
+
+            <div class="column" id="progress">
+                <h2>진행 중</h2>
+                <div class="task-list" id="progressTasks"></div>
+            </div>
+
+            <div class="column" id="done">
+                <h2>완료</h2>
+                <div class="task-list" id="doneTasks"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase 초기화 주석 처리
+        // const app = initializeApp(firebaseConfig);
+        // const db = getFirestore(app);
+
+        // 로컬 스토리지 사용
+        let tasks = {
+            todo: [],
+            progress: [],
+            done: []
+        };
+
+        // DOM 요소
+        const taskLists = {
+            todo: document.getElementById('todoTasks'),
+            progress: document.getElementById('progressTasks'),
+            done: document.getElementById('doneTasks')
+        };
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('페이지 초기화 시작');
+            
+            // 로컬 스토리지에서 데이터 복원
+            const savedTasks = localStorage.getItem('tasks');
+            if (savedTasks) {
+                try {
+                    tasks = JSON.parse(savedTasks);
+                    console.log('로컬 스토리지에서 데이터 로드 성공');
+                } catch (error) {
+                    console.error('로컬 스토리지 데이터 파싱 오류:', error);
+                    tasks = {
+                        todo: [],
+                        progress: [],
+                        done: []
+                    };
+                }
+            }
+            
+            renderTasks();
+            setupEventListeners();
+            console.log('페이지 초기화 완료');
+        });
+
+        // 태스크 추가 함수
+        window.addTask = function(status) {
+            const input = document.getElementById(`${status}-input`);
+            const text = input.value.trim();
+            if (!text) return;
+
+            const newTask = {
+                id: Date.now().toString(),
+                text: text,
+                memo: "",
+                dueDate: new Date().toISOString().split('T')[0],
+                createdAt: Date.now(),
+                lastUpdated: Date.now()
+            };
+
+            tasks[status].push(newTask);
+            saveTasks();
+            input.value = '';
+            renderTasks();
+        };
+
+        // 태스크 저장 함수
+        function saveTasks() {
+            try {
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                console.log('로컬 스토리지에 데이터 저장 성공');
+            } catch (error) {
+                console.error('로컬 스토리지 저장 오류:', error);
+            }
+        }
+
+        // 태스크 삭제 함수
+        window.deleteTask = function(id, status) {
+            tasks[status] = tasks[status].filter(task => task.id !== id);
+            saveTasks();
+            renderTasks();
+        };
+
+        // 태스크 수정 함수
+        window.editTask = function(id, status) {
+            const taskIndex = tasks[status].findIndex(task => task.id === id);
+            if (taskIndex === -1) return;
+
+            const newText = prompt('수정할 내용을 입력하세요:', tasks[status][taskIndex].text);
+            if (newText && newText.trim()) {
+                tasks[status][taskIndex].text = newText.trim();
+                tasks[status][taskIndex].lastUpdated = Date.now();
+                saveTasks();
+                renderTasks();
+            }
+        };
+
+        // 태스크 이동 함수
+        window.moveTask = function(id, fromStatus, toStatus) {
+            const taskIndex = tasks[fromStatus].findIndex(task => task.id === id);
+            if (taskIndex === -1) return;
+
+            const task = tasks[fromStatus][taskIndex];
+            task.lastUpdated = Date.now();
+            
+            tasks[fromStatus].splice(taskIndex, 1);
+            tasks[toStatus].push(task);
+            
+            saveTasks();
+            renderTasks();
+        };
+
+        // 메모 저장 함수
+        window.saveMemo = function(id, status) {
+            const taskIndex = tasks[status].findIndex(task => task.id === id);
+            if (taskIndex === -1) return;
+
+            const memoInput = document.getElementById(`memo-${id}`);
+            if (memoInput) {
+                tasks[status][taskIndex].memo = memoInput.value;
+                tasks[status][taskIndex].lastUpdated = Date.now();
+                saveTasks();
+                renderTasks();
+            }
+        };
+
+        // 태스크 렌더링
+        function renderTasks() {
+            for (const status in taskLists) {
+                const container = taskLists[status];
+                if (!container) continue;
+
+                container.innerHTML = tasks[status].map(task => `
+                    <div class="task" data-id="${task.id}">
+                        <div class="task-content">
+                            <div>${task.text}</div>
+                            ${task.dueDate ? `<div class="due-date">마감일: ${task.dueDate}</div>` : ''}
+                            ${task.memo ? `<div class="memo">메모: ${task.memo}</div>` : ''}
+                        </div>
+                        <div class="task-actions">
+                            <button class="edit-btn" onclick="editTask('${task.id}', '${status}')">수정</button>
+                            <button class="delete-btn" onclick="deleteTask('${task.id}', '${status}')">삭제</button>
+                            <button class="memo-btn" onclick="toggleMemo('${task.id}', '${status}')">메모</button>
+                            ${status !== 'done' ? `
+                                <button class="move-btn" onclick="moveTask('${task.id}', '${status}', '${status === 'todo' ? 'progress' : 'done'}')">
+                                    ${status === 'todo' ? '진행' : '완료'}
+                                </button>
+                            ` : ''}
+                        </div>
+                        <div class="memo-container ${task.showMemo ? 'active' : ''}">
+                            <textarea class="memo-input" id="memo-${task.id}" placeholder="메모를 입력하세요...">${task.memo || ''}</textarea>
+                            <div class="memo-actions">
+                                <button class="save-btn" onclick="saveMemo('${task.id}', '${status}')">저장</button>
+                                <button class="cancel-btn" onclick="cancelMemo('${task.id}', '${status}')">취소</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // 실시간 업데이트 리스너 설정
+        function setupRealtimeListener() {
+            const tasksRef = collection(db, 'tasks');
+            onSnapshot(tasksRef, (snapshot) => {
+                console.log('Firebase 데이터 변경 감지');
+                
+                // 데이터 초기화
+                const newTasks = {
+                    todo: [],
+                    progress: [],
+                    done: []
+                };
+
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    if (data.status && data.task) {
+                        const task = {
+                            ...data.task,
+                            docId: doc.id,
+                            lastUpdated: data.timestamp || Date.now()
+                        };
+                        
+                        // 중복 체크 및 업데이트
+                        const existingIndex = newTasks[data.status].findIndex(t => t.docId === doc.id);
+                        if (existingIndex === -1) {
+                            newTasks[data.status].push(task);
+                        } else {
+                            newTasks[data.status][existingIndex] = task;
+                        }
+                    }
+                });
+
+                // 상태별로 정렬 (최신순)
+                for (const status in newTasks) {
+                    newTasks[status].sort((a, b) => b.lastUpdated - a.lastUpdated);
+                }
+
+                // 로컬 상태 업데이트
+                tasks = newTasks;
+                
+                // 로컬 스토리지에 저장
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                
+                // UI 업데이트
+                renderTasks();
+                
+                console.log('데이터 동기화 완료:', tasks);
+            }, (error) => {
+                console.error('실시간 업데이트 오류:', error);
+            });
+        }
+
+        // 페이지 언로드 시 데이터 저장
+        window.addEventListener('beforeunload', () => {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        });
+
+        // DB 연동 테스트 함수 수정
+        async function testDBConnection() {
+            try {
+                console.log('DB 연결 테스트 시작...');
+                
+                // 테스트 데이터 추가
+                const testData = {
+                    test: 'connection_test',
+                    timestamp: new Date().getTime(),
+                    status: 'test'
+                };
+                
+                const docRef = await addDoc(collection(db, 'tasks'), testData);
+                console.log('테스트 데이터 추가 성공:', docRef.id);
+                
+                // 테스트 데이터 읽기
+                const docSnap = await getDoc(docRef);
+                console.log('테스트 데이터 읽기 성공:', docSnap.data());
+                
+                // 테스트 데이터 삭제
+                await deleteDoc(docRef);
+                console.log('테스트 데이터 삭제 성공');
+                
+                return true;
+            } catch (error) {
+                console.error('DB 연결 테스트 실패:', error);
+                return false;
+            }
+        }
+
+        // 페이지 로드 시 DB 연결 테스트 실행
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('페이지 로드 시작');
+            
+            try {
+                // DB 연결 테스트
+                const isConnected = await testDBConnection();
+                if (isConnected) {
+                    console.log('Firebase DB 연결 성공!');
+                } else {
+                    console.error('Firebase DB 연결 실패!');
+                }
+                
+                // 기존 초기화 코드
+                setupRealtimeListener();
+                loadTasks();
+                setupRealtimeListener();
+                
+                console.log('페이지 초기화 완료');
+            } catch (error) {
+                console.error('페이지 초기화 중 오류 발생:', error);
+            }
+        });
+    </script>
+</body>
+</html>
